@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Dysfunction BINGO</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Fredoka+One:wght@400&family=Comic+Neue:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5em;
+            color: #4a00e0;
+            text-shadow: 3px 3px 0px #8e2de2;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .bingo-square {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bingo-square:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-color: #8e2de2;
+        }
+        
+        .bingo-square.marked {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-color: #c44569;
+            transform: rotate(2deg) scale(1.05);
+            animation: celebrate 0.6s ease;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-5deg) scale(1.1); }
+            50% { transform: rotate(5deg) scale(1.1); }
+            75% { transform: rotate(-2deg) scale(1.05); }
+            100% { transform: rotate(2deg) scale(1.05); }
+        }
+        
+        .bingo-square.marked::after {
+            content: "✓";
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: linear-gradient(145deg, #8e2de2, #4a00e0);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Comic Neue', cursive;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .victory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .victory-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+            position: relative;
+            animation: victoryBounce 0.6s ease;
+        }
+        
+        @keyframes victoryBounce {
+            0% { transform: scale(0.3) rotate(-180deg); opacity: 0; }
+            50% { transform: scale(1.1) rotate(-5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        .victory-emoji {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: spin 2s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+        
+        .victory-text {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.8em;
+            color: #4a00e0;
+            margin-bottom: 15px;
+        }
+        
+        .victory-subtitle {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .reward-text {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+            
+            .bingo-square {
+                font-size: 0.8em;
+                padding: 10px;
+                min-height: 100px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🧠 Dysfunction BINGO</h1>
+            <p class="subtitle">Because we're all beautifully broken 💫</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-number" id="marked-count">0</span>
+                <span class="stat-label">Marked</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number" id="bingo-count">0</span>
+                <span class="stat-label">BINGOs</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number" id="dignity-level">???</span>
+                <span class="stat-label">Dignity Level</span>
+            </div>
+        </div>
+        
+        <div class="bingo-grid" id="bingo-grid">
+            <!-- Grid will be populated by JavaScript -->
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="resetGame()">🔄 New Game</button>
+            <button class="btn" onclick="markRandom()">🎲 Random Chaos</button>
+            <button class="btn" onclick="showRules()">📋 Rules</button>
+        </div>
+        
+        <div class="footer">
+            <p>Goal: Get 3 in a row for one dopamine snack and maybe your dignity back 🎯</p>
+        </div>
+    </div>
+    
+    <div class="victory-modal" id="victory-modal">
+        <div class="victory-content">
+            <div class="victory-emoji">🎉</div>
+            <div class="victory-text">BINGO!</div>
+            <div class="victory-subtitle">You've achieved peak dysfunction!</div>
+            <div class="reward-text">
+                🍪 Reward: One dopamine snack<br>
+                ✨ Your dignity: Still questionable, but hey!
+            </div>
+            <button class="btn" onclick="closeVictory()">Accept My Fate</button>
+        </div>
+    </div>
+
+    <script>
+        const bingoSquares = [
+            "❏ Apologized for Existing",
+            "❏ Started a new system, abandoned immediately", 
+            "❏ Cry-cleaned one spoon",
+            "❏ Wrote a to-do list and immediately lost it",
+            "❏ Hyperfocused on fixing one drawer for 3 hours",
+            "❏ Forgot your age mid-sentence",
+            "❏ Googled 'Am I dying?' for a minor symptom",
+            "❏ Bought organizers to organize your organizers",
+            "❏ Set 47 alarms, snoozed them all"
+        ];
+        
+        let gameState = {
+            marked: new Array(9).fill(false),
+            bingoCount: 0,
+            gameStarted: false
+        };
+        
+        let bingoLines = [
+            [0,1,2], [3,4,5], [6,7,8], // rows
+            [0,3,6], [1,4,7], [2,5,8], // columns  
+            [0,4,8], [2,4,6] // diagonals
+        ];
+        
+        function initGame() {
+            const grid = document.getElementById('bingo-grid');
+            grid.innerHTML = '';
+            
+            bingoSquares.forEach((square, index) => {
+                const squareElement = document.createElement('div');
+                squareElement.className = 'bingo-square';
+                squareElement.innerHTML = square;
+                squareElement.onclick = () => toggleSquare(index);
+                squareElement.id = `square-${index}`;
+                grid.appendChild(squareElement);
+            });
+            
+            updateStats();
+        }
+        
+        function toggleSquare(index) {
+            gameState.marked[index] = !gameState.marked[index];
+            const square = document.getElementById(`square-${index}`);
+            
+            if (gameState.marked[index]) {
+                square.classList.add('marked');
+                playSound('mark');
+            } else {
+                square.classList.remove('marked');
+            }
+            
+            updateStats();
+            checkForBingo();
+        }
+        
+        function checkForBingo() {
+            let newBingos = 0;
+            
+            bingoLines.forEach(line => {
+                if (line.every(index => gameState.marked[index])) {
+                    newBingos++;
+                }
+            });
+            
+            if (newBingos > gameState.bingoCount) {
+                gameState.bingoCount = newBingos;
+                showVictory();
+                createConfetti();
+                playSound('victory');
+            }
+        }
+        
+        function updateStats() {
+            const markedCount = gameState.marked.filter(m => m).length;
+            document.getElementById('marked-count').textContent = markedCount;
+            document.getElementById('bingo-count').textContent = gameState.bingoCount;
+            
+            // Update dignity level based on marked squares
+            const dignityLevels = ['Intact', 'Cracking', 'Questionable', 'Gone', 'What dignity?', 'Negative', 'Help', 'SOS', 'Peak Chaos'];
+            const dignityIndex = Math.min(markedCount, dignityLevels.length - 1);
+            document.getElementById('dignity-level').textContent = dignityLevels[dignityIndex];
+        }
+        
+        function showVictory() {
+            document.getElementById('victory-modal').style.display = 'flex';
+        }
+        
+        function closeVictory() {
+            document.getElementById('victory-modal').style.display = 'none';
+        }
+        
+        function resetGame() {
+            gameState = {
+                marked: new Array(9).fill(false),
+                bingoCount: 0,
+                gameStarted: false
+            };
+            
+            document.querySelectorAll('.bingo-square').forEach(square => {
+                square.classList.remove('marked');
+            });
+            
+            updateStats();
+            playSound('reset');
+        }
+        
+        function markRandom() {
+            const unmarkedSquares = gameState.marked
+                .map((marked, index) => marked ? null : index)
+                .filter(index => index !== null);
+            
+            if (unmarkedSquares.length > 0) {
+                const randomIndex = unmarkedSquares[Math.floor(Math.random() * unmarkedSquares.length)];
+                toggleSquare(randomIndex);
+            }
+        }
+        
+        function showRules() {
+            alert("🎯 DYSFUNCTION BINGO RULES:\n\n" +
+                  "1. Click squares that describe your beautiful chaos\n" +
+                  "2. Get 3 in a row (any direction) for BINGO!\n" +
+                  "3. Collect your dopamine snack reward\n" +
+                  "4. Watch your dignity level plummet\n" +
+                  "5. Embrace the beautiful disaster you are ✨\n\n" +
+                  "Remember: We're all just winging it! 🎭");
+        }
+        
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }, i * 100);
+            }
+        }
+        
+        function playSound(type) {
+            // Create audio context for sound effects
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const frequencies = {
+                'mark': 800,
+                'victory': [523, 659, 784, 1047],
+                'reset': 400
+            };
+            
+            if (type === 'victory') {
+                // Play victory chord
+                frequencies.victory.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                        oscillator.type = 'sine';
+                        
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    }, index * 100);
+                });
+            } else {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequencies[type], audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            }
+        }
+        
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
