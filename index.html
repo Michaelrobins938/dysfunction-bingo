@@ -2,173 +2,364 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧠 Dysfunction BINGO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🧠 Dysfunction BINGO - Interactive Game</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Fredoka+One:wght@400&family=Comic+Neue:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(145deg, #8e2de2, #4a00e0);
+            --success-gradient: linear-gradient(145deg, #ff6b6b, #ee5a24);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-radius: 20px;
+            --shadow-light: 0 10px 30px rgba(0,0,0,0.1);
+            --shadow-heavy: 0 20px 40px rgba(0,0,0,0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            font-family: 'Comic Neue', cursive;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Poppins', sans-serif;
+            background: var(--primary-gradient);
             min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            padding: 10px;
+            color: var(--text-primary);
             overflow-x: hidden;
+            position: relative;
+        }
+        
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .floating-emoji {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 15s infinite linear;
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
         }
         
         .container {
-            max-width: 600px;
+            max-width: 480px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--shadow-heavy);
+            backdrop-filter: blur(20px);
             position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
         
         .title {
             font-family: 'Fredoka One', cursive;
-            font-size: 2.5em;
-            color: #4a00e0;
-            text-shadow: 3px 3px 0px #8e2de2;
-            margin-bottom: 10px;
-            animation: pulse 2s infinite;
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            animation: titlePulse 3s ease-in-out infinite;
         }
         
-        @keyframes pulse {
+        @keyframes titlePulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.02); }
         }
         
         .subtitle {
-            font-size: 1.2em;
-            color: #666;
-            font-weight: bold;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 0.3s forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
             margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary-gradient);
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .stat {
+            background: var(--primary-gradient);
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+            color: white;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .stat:hover::before {
+            left: 100%;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            font-weight: 300;
         }
         
         .bingo-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 24px;
+            perspective: 1000px;
         }
         
         .bingo-square {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 3px solid #ddd;
-            border-radius: 15px;
-            padding: 15px;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border: 2px solid #e9ecef;
+            border-radius: 16px;
+            padding: 16px;
             text-align: center;
-            font-size: 0.9em;
-            font-weight: bold;
+            font-size: 0.8rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             min-height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
+            user-select: none;
+            transform-style: preserve-3d;
+        }
+        
+        .bingo-square::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--secondary-gradient);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: -1;
         }
         
         .bingo-square:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transform: translateY(-4px) rotateX(5deg);
+            box-shadow: var(--shadow-light);
             border-color: #8e2de2;
         }
         
-        .bingo-square.marked {
-            background: linear-gradient(145deg, #ff6b6b, #ee5a24);
-            color: white;
-            border-color: #c44569;
-            transform: rotate(2deg) scale(1.05);
-            animation: celebrate 0.6s ease;
+        .bingo-square:active {
+            transform: translateY(-2px) scale(0.98);
         }
         
-        @keyframes celebrate {
-            0% { transform: rotate(0deg) scale(1); }
-            25% { transform: rotate(-5deg) scale(1.1); }
-            50% { transform: rotate(5deg) scale(1.1); }
-            75% { transform: rotate(-2deg) scale(1.05); }
-            100% { transform: rotate(2deg) scale(1.05); }
+        .bingo-square.marked {
+            background: var(--success-gradient);
+            color: white;
+            border-color: #c44569;
+            transform: translateY(-2px) rotateY(180deg);
+            animation: markAnimation 0.6s ease;
+        }
+        
+        .bingo-square.marked::before {
+            opacity: 1;
+        }
+        
+        @keyframes markAnimation {
+            0% { transform: rotateY(0deg) scale(1); }
+            50% { transform: rotateY(90deg) scale(1.1); }
+            100% { transform: rotateY(180deg) scale(1); }
         }
         
         .bingo-square.marked::after {
             content: "✓";
             position: absolute;
-            top: 5px;
-            right: 10px;
-            font-size: 1.5em;
+            top: 8px;
+            right: 12px;
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #fff;
+            color: rgba(255,255,255,0.9);
+            animation: checkmark 0.3s ease 0.3s both;
         }
         
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 15px;
-            color: white;
+        @keyframes checkmark {
+            from {
+                opacity: 0;
+                transform: scale(0) rotate(-45deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
         }
         
-        .stat {
-            text-align: center;
+        .bingo-square.winning {
+            animation: winningPulse 1s ease-in-out infinite;
         }
         
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
+        @keyframes winningPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(2deg); }
         }
         
         .controls {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
         
         .btn {
-            background: linear-gradient(145deg, #8e2de2, #4a00e0);
+            background: var(--secondary-gradient);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 1em;
-            font-weight: bold;
+            padding: 14px 20px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Comic Neue', cursive;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            overflow: hidden;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn:active {
             transform: translateY(0);
+        }
+        
+        .btn.secondary {
+            background: linear-gradient(145deg, #6c757d, #495057);
         }
         
         .victory-modal {
@@ -177,113 +368,183 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(10px);
         }
         
         .victory-content {
             background: white;
-            padding: 40px;
-            border-radius: 20px;
+            padding: 40px 30px;
+            border-radius: 24px;
             text-align: center;
-            max-width: 400px;
+            max-width: 350px;
             margin: 20px;
             position: relative;
-            animation: victoryBounce 0.6s ease;
+            animation: victoryBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: var(--shadow-heavy);
         }
         
         @keyframes victoryBounce {
-            0% { transform: scale(0.3) rotate(-180deg); opacity: 0; }
-            50% { transform: scale(1.1) rotate(-5deg); opacity: 1; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            0% { 
+                transform: scale(0.3) rotate(-180deg); 
+                opacity: 0; 
+            }
+            60% { 
+                transform: scale(1.1) rotate(-10deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1; 
+            }
         }
         
         .victory-emoji {
-            font-size: 4em;
+            font-size: 4rem;
             margin-bottom: 20px;
-            animation: spin 2s ease-in-out infinite;
+            animation: celebrationSpin 2s ease-in-out infinite;
         }
         
-        @keyframes spin {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-10deg); }
-            75% { transform: rotate(10deg); }
+        @keyframes celebrationSpin {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-15deg) scale(1.1); }
+            75% { transform: rotate(15deg) scale(1.1); }
         }
         
         .victory-text {
             font-family: 'Fredoka One', cursive;
-            font-size: 1.8em;
-            color: #4a00e0;
-            margin-bottom: 15px;
+            font-size: 2rem;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
         }
         
         .victory-subtitle {
-            font-size: 1.1em;
-            color: #666;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
         }
         
         .reward-text {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: var(--success-gradient);
             color: white;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 12px;
             margin: 20px 0;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
         
         .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #ff6b6b;
-            animation: confetti-fall 3s linear infinite;
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
         }
         
-        @keyframes confetti-fall {
-            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        .confetti-piece {
+            width: 8px;
+            height: 8px;
+            position: absolute;
+            border-radius: 50%;
         }
         
         .footer {
             text-align: center;
-            margin-top: 30px;
-            font-size: 0.9em;
-            color: #666;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
             font-style: italic;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1s forwards;
         }
         
-        @media (max-width: 600px) {
-            .container {
-                margin: 10px;
-                padding: 20px;
+        /* Enhanced Mobile Optimization */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
             }
             
-            .title {
-                font-size: 2em;
+            .container {
+                padding: 20px;
+                border-radius: 16px;
             }
             
             .bingo-square {
-                font-size: 0.8em;
-                padding: 10px;
+                font-size: 0.75rem;
+                padding: 12px;
                 min-height: 100px;
+                border-radius: 12px;
+            }
+            
+            .stats {
+                gap: 8px;
+            }
+            
+            .stat {
+                padding: 12px;
+                border-radius: 12px;
+            }
+            
+            .stat-number {
+                font-size: 1.25rem;
             }
             
             .controls {
-                flex-direction: column;
-                align-items: center;
+                gap: 8px;
             }
+            
+            .btn {
+                padding: 12px 16px;
+                font-size: 0.85rem;
+                min-height: 44px;
+            }
+        }
+        
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        
+        /* Focus styles for accessibility */
+        .bingo-square:focus,
+        .btn:focus {
+            outline: 3px solid #4a00e0;
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
+    <div class="background-animation" id="background-animation"></div>
+    
     <div class="container">
         <div class="header">
             <h1 class="title">🧠 Dysfunction BINGO</h1>
             <p class="subtitle">Because we're all beautifully broken 💫</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
         </div>
         
         <div class="stats">
@@ -296,237 +557,453 @@
                 <span class="stat-label">BINGOs</span>
             </div>
             <div class="stat">
-                <span class="stat-number" id="dignity-level">???</span>
-                <span class="stat-label">Dignity Level</span>
+                <span class="stat-number" id="dignity-level">Intact</span>
+                <span class="stat-label">Dignity</span>
             </div>
         </div>
         
-        <div class="bingo-grid" id="bingo-grid">
+        <div class="bingo-grid" id="bingo-grid" role="grid" aria-label="Dysfunction BINGO Game Board">
             <!-- Grid will be populated by JavaScript -->
         </div>
         
         <div class="controls">
-            <button class="btn" onclick="resetGame()">🔄 New Game</button>
-            <button class="btn" onclick="markRandom()">🎲 Random Chaos</button>
-            <button class="btn" onclick="showRules()">📋 Rules</button>
+            <button class="btn" onclick="resetGame()" aria-label="Start new game">
+                🔄 New Game
+            </button>
+            <button class="btn secondary" onclick="markRandom()" aria-label="Mark random square">
+                🎲 Random
+            </button>
+            <button class="btn secondary" onclick="showRules()" aria-label="Show game rules">
+                📋 Rules
+            </button>
         </div>
         
         <div class="footer">
-            <p>Goal: Get 3 in a row for one dopamine snack and maybe your dignity back 🎯</p>
+            <p>Goal: Get 3 in a row for peak dysfunction achievement 🎯</p>
         </div>
     </div>
     
-    <div class="victory-modal" id="victory-modal">
+    <div class="victory-modal" id="victory-modal" role="dialog" aria-modal="true" aria-labelledby="victory-title">
         <div class="victory-content">
-            <div class="victory-emoji">🎉</div>
-            <div class="victory-text">BINGO!</div>
+            <div class="victory-emoji" role="img" aria-label="Celebration">🎉</div>
+            <div class="victory-text" id="victory-title">BINGO!</div>
             <div class="victory-subtitle">You've achieved peak dysfunction!</div>
             <div class="reward-text">
                 🍪 Reward: One dopamine snack<br>
                 ✨ Your dignity: Still questionable, but hey!
             </div>
-            <button class="btn" onclick="closeVictory()">Accept My Fate</button>
+            <button class="btn" onclick="closeVictory()" aria-label="Close victory modal">
+                Accept My Fate
+            </button>
         </div>
     </div>
 
     <script>
-        const bingoSquares = [
-            "❏ Apologized for Existing",
-            "❏ Started a new system, abandoned immediately", 
-            "❏ Cry-cleaned one spoon",
-            "❏ Wrote a to-do list and immediately lost it",
-            "❏ Hyperfocused on fixing one drawer for 3 hours",
-            "❏ Forgot your age mid-sentence",
-            "❏ Googled 'Am I dying?' for a minor symptom",
-            "❏ Bought organizers to organize your organizers",
-            "❏ Set 47 alarms, snoozed them all"
-        ];
-        
-        let gameState = {
-            marked: new Array(9).fill(false),
-            bingoCount: 0,
-            gameStarted: false
-        };
-        
-        let bingoLines = [
-            [0,1,2], [3,4,5], [6,7,8], // rows
-            [0,3,6], [1,4,7], [2,5,8], // columns  
-            [0,4,8], [2,4,6] // diagonals
-        ];
-        
-        function initGame() {
-            const grid = document.getElementById('bingo-grid');
-            grid.innerHTML = '';
-            
-            bingoSquares.forEach((square, index) => {
-                const squareElement = document.createElement('div');
-                squareElement.className = 'bingo-square';
-                squareElement.innerHTML = square;
-                squareElement.onclick = () => toggleSquare(index);
-                squareElement.id = `square-${index}`;
-                grid.appendChild(squareElement);
-            });
-            
-            updateStats();
-        }
-        
-        function toggleSquare(index) {
-            gameState.marked[index] = !gameState.marked[index];
-            const square = document.getElementById(`square-${index}`);
-            
-            if (gameState.marked[index]) {
-                square.classList.add('marked');
-                playSound('mark');
-            } else {
-                square.classList.remove('marked');
+        class DysfunctionBingo {
+            constructor() {
+                this.bingoSquares = [
+                    "❏ Apologized for existing today",
+                    "❏ Started a system, abandoned it immediately", 
+                    "❏ Cry-cleaned exactly one spoon",
+                    "❏ Wrote a to-do list and lost it",
+                    "❏ Hyperfocused on one drawer for 3 hours",
+                    "❏ Forgot your age mid-sentence",
+                    "❏ Googled 'Am I dying?' for minor symptom",
+                    "❏ Bought organizers for your organizers",
+                    "❏ Set 47 alarms, snoozed them all"
+                ];
+                
+                this.gameState = {
+                    marked: new Array(9).fill(false),
+                    bingoCount: 0,
+                    gameStarted: false,
+                    winningLines: []
+                };
+                
+                this.bingoLines = [
+                    [0,1,2], [3,4,5], [6,7,8], // rows
+                    [0,3,6], [1,4,7], [2,5,8], // columns  
+                    [0,4,8], [2,4,6] // diagonals
+                ];
+                
+                this.audioContext = null;
+                this.sounds = {};
+                
+                this.init();
             }
             
-            updateStats();
-            checkForBingo();
-        }
-        
-        function checkForBingo() {
-            let newBingos = 0;
+            init() {
+                this.initAudio();
+                this.createBackgroundAnimation();
+                this.renderGrid();
+                this.updateStats();
+                this.addEventListeners();
+            }
             
-            bingoLines.forEach(line => {
-                if (line.every(index => gameState.marked[index])) {
-                    newBingos++;
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.createSounds();
+                } catch (e) {
+                    console.log('Audio not supported');
                 }
-            });
-            
-            if (newBingos > gameState.bingoCount) {
-                gameState.bingoCount = newBingos;
-                showVictory();
-                createConfetti();
-                playSound('victory');
             }
-        }
-        
-        function updateStats() {
-            const markedCount = gameState.marked.filter(m => m).length;
-            document.getElementById('marked-count').textContent = markedCount;
-            document.getElementById('bingo-count').textContent = gameState.bingoCount;
             
-            // Update dignity level based on marked squares
-            const dignityLevels = ['Intact', 'Cracking', 'Questionable', 'Gone', 'What dignity?', 'Negative', 'Help', 'SOS', 'Peak Chaos'];
-            const dignityIndex = Math.min(markedCount, dignityLevels.length - 1);
-            document.getElementById('dignity-level').textContent = dignityLevels[dignityIndex];
-        }
-        
-        function showVictory() {
-            document.getElementById('victory-modal').style.display = 'flex';
-        }
-        
-        function closeVictory() {
-            document.getElementById('victory-modal').style.display = 'none';
-        }
-        
-        function resetGame() {
-            gameState = {
-                marked: new Array(9).fill(false),
-                bingoCount: 0,
-                gameStarted: false
-            };
-            
-            document.querySelectorAll('.bingo-square').forEach(square => {
-                square.classList.remove('marked');
-            });
-            
-            updateStats();
-            playSound('reset');
-        }
-        
-        function markRandom() {
-            const unmarkedSquares = gameState.marked
-                .map((marked, index) => marked ? null : index)
-                .filter(index => index !== null);
-            
-            if (unmarkedSquares.length > 0) {
-                const randomIndex = unmarkedSquares[Math.floor(Math.random() * unmarkedSquares.length)];
-                toggleSquare(randomIndex);
+            createSounds() {
+                this.sounds = {
+                    mark: { frequency: 800, duration: 0.1 },
+                    unmark: { frequency: 400, duration: 0.1 },
+                    bingo: { frequencies: [523, 659, 784, 1047], duration: 0.8 },
+                    reset: { frequency: 300, duration: 0.2 }
+                };
             }
-        }
-        
-        function showRules() {
-            alert("🎯 DYSFUNCTION BINGO RULES:\n\n" +
-                  "1. Click squares that describe your beautiful chaos\n" +
-                  "2. Get 3 in a row (any direction) for BINGO!\n" +
-                  "3. Collect your dopamine snack reward\n" +
-                  "4. Watch your dignity level plummet\n" +
-                  "5. Embrace the beautiful disaster you are ✨\n\n" +
-                  "Remember: We're all just winging it! 🎭");
-        }
-        
-        function createConfetti() {
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];
             
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDelay = Math.random() * 3 + 's';
-                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                    document.body.appendChild(confetti);
-                    
-                    setTimeout(() => {
-                        confetti.remove();
-                    }, 5000);
-                }, i * 100);
+            playSound(type) {
+                if (!this.audioContext) return;
+                
+                const sound = this.sounds[type];
+                if (!sound) return;
+                
+                if (type === 'bingo') {
+                    sound.frequencies.forEach((freq, index) => {
+                        setTimeout(() => {
+                            this.createTone(freq, sound.duration / 4);
+                        }, index * 100);
+                    });
+                } else {
+                    this.createTone(sound.frequency, sound.duration);
+                }
             }
-        }
-        
-        function playSound(type) {
-            // Create audio context for sound effects
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             
-            const frequencies = {
-                'mark': 800,
-                'victory': [523, 659, 784, 1047],
-                'reset': 400
-            };
-            
-            if (type === 'victory') {
-                // Play victory chord
-                frequencies.victory.forEach((freq, index) => {
-                    setTimeout(() => {
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        
-                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-                        oscillator.type = 'sine';
-                        
-                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                        
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.5);
-                    }, index * 100);
-                });
-            } else {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+            createTone(frequency, duration) {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
                 
                 oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(this.audioContext.destination);
                 
-                oscillator.frequency.setValueAtTime(frequencies[type], audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
                 oscillator.type = 'sine';
                 
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
                 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+            
+            createBackgroundAnimation() {
+                const emojis = ['🧠', '💫', '✨', '🎯', '🎭', '🎪', '🎨', '🎪'];
+                const container = document.getElementById('background-animation');
+                
+                setInterval(() => {
+                    if (Math.random() < 0.3) {
+                        const emoji = document.createElement('div');
+                        emoji.className = 'floating-emoji';
+                        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                        emoji.style.left = Math.random() * 100 + '%';
+                        emoji.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                        container.appendChild(emoji);
+                        
+                        setTimeout(() => emoji.remove(), 15000);
+                    }
+                }, 3000);
+            }
+            
+            renderGrid() {
+                const grid = document.getElementById('bingo-grid');
+                grid.innerHTML = '';
+                
+                this.bingoSquares.forEach((square, index) => {
+                    const squareElement = document.createElement('div');
+                    squareElement.className = 'bingo-square';
+                    squareElement.innerHTML = square;
+                    squareElement.setAttribute('role', 'gridcell');
+                    squareElement.setAttribute('aria-label', square.replace('❏', ''));
+                    squareElement.setAttribute('tabindex', '0');
+                    squareElement.addEventListener('click', () => this.toggleSquare(index));
+                    squareElement.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.toggleSquare(index);
+                        }
+                    });
+                    squareElement.id = `square-${index}`;
+                    grid.appendChild(squareElement);
+                });
+            }
+            
+            toggleSquare(index) {
+                if (!this.audioContext && this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                const wasMarked = this.gameState.marked[index];
+                this.gameState.marked[index] = !wasMarked;
+                const square = document.getElementById(`square-${index}`);
+                
+                if (this.gameState.marked[index]) {
+                    square.classList.add('marked');
+                    square.setAttribute('aria-checked', 'true');
+                    this.playSound('mark');
+                    this.createParticleEffect(square);
+                } else {
+                    square.classList.remove('marked');
+                    square.setAttribute('aria-checked', 'false');
+                    this.playSound('unmark');
+                }
+                
+                this.updateStats();
+                this.checkForBingo();
+            }
+            
+            createParticleEffect(element) {
+                const rect = element.getBoundingClientRect();
+                const particles = ['✨', '💫', '⭐'];
+                
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+                        particle.style.position = 'fixed';
+                        particle.style.left = (rect.left + Math.random() * rect.width) + 'px';
+                        particle.style.top = (rect.top + Math.random() * rect.height) + 'px';
+                        particle.style.pointerEvents = 'none';
+                        particle.style.fontSize = '1rem';
+                        particle.style.zIndex = '999';
+                        particle.style.animation = 'float 1s ease-out forwards';
+                        
+                        document.body.appendChild(particle);
+                        setTimeout(() => particle.remove(), 1000);
+                    }, i * 50);
+                }
+            }
+            
+            checkForBingo() {
+                const newWinningLines = [];
+                let newBingos = 0;
+                
+                this.bingoLines.forEach((line, lineIndex) => {
+                    if (line.every(index => this.gameState.marked[index])) {
+                        newBingos++;
+                        newWinningLines.push(lineIndex);
+                    }
+                });
+                
+                if (newBingos > this.gameState.bingoCount) {
+                    this.gameState.bingoCount = newBingos;
+                    this.gameState.winningLines = newWinningLines;
+                    this.highlightWinningSquares();
+                    this.showVictory();
+                    this.createConfetti();
+                    this.playSound('bingo');
+                }
+            }
+            
+            highlightWinningSquares() {
+                // Remove previous winning highlights
+                document.querySelectorAll('.bingo-square.winning').forEach(square => {
+                    square.classList.remove('winning');
+                });
+                
+                // Add winning highlights
+                this.gameState.winningLines.forEach(lineIndex => {
+                    this.bingoLines[lineIndex].forEach(squareIndex => {
+                        const square = document.getElementById(`square-${squareIndex}`);
+                        square.classList.add('winning');
+                    });
+                });
+            }
+            
+            updateStats() {
+                const markedCount = this.gameState.marked.filter(m => m).length;
+                document.getElementById('marked-count').textContent = markedCount;
+                document.getElementById('bingo-count').textContent = this.gameState.bingoCount;
+                
+                // Update progress bar
+                const progressFill = document.getElementById('progress-fill');
+                progressFill.style.width = (markedCount / 9 * 100) + '%';
+                
+                // Update dignity level with more personality
+                const dignityLevels = [
+                    'Intact', 'Cracking', 'Questionable', 'Sliding', 'Gone', 
+                    'Negative', 'Help Me', 'SOS', 'Peak Chaos'
+                ];
+                const dignityIndex = Math.min(markedCount, dignityLevels.length - 1);
+                document.getElementById('dignity-level').textContent = dignityLevels[dignityIndex];
+            }
+            
+            showVictory() {
+                const modal = document.getElementById('victory-modal');
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+                
+                // Focus management for accessibility
+                const closeBtn = modal.querySelector('.btn');
+                setTimeout(() => closeBtn.focus(), 300);
+            }
+            
+            closeVictory() {
+                const modal = document.getElementById('victory-modal');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+            
+            resetGame() {
+                this.gameState = {
+                    marked: new Array(9).fill(false),
+                    bingoCount: 0,
+                    gameStarted: false,
+                    winningLines: []
+                };
+                
+                document.querySelectorAll('.bingo-square').forEach(square => {
+                    square.classList.remove('marked', 'winning');
+                    square.setAttribute('aria-checked', 'false');
+                });
+                
+                this.updateStats();
+                this.playSound('reset');
+                
+                // Add reset animation
+                const container = document.querySelector('.container');
+                container.style.animation = 'none';
+                setTimeout(() => {
+                    container.style.animation = 'slideUp 0.6s ease-out';
+                }, 10);
+            }
+            
+            markRandom() {
+                const unmarkedSquares = this.gameState.marked
+                    .map((marked, index) => marked ? null : index)
+                    .filter(index => index !== null);
+                
+                if (unmarkedSquares.length > 0) {
+                    const randomIndex = unmarkedSquares[Math.floor(Math.random() * unmarkedSquares.length)];
+                    setTimeout(() => this.toggleSquare(randomIndex), 100);
+                }
+            }
+            
+            showRules() {
+                const rulesModal = document.createElement('div');
+                rulesModal.className = 'victory-modal';
+                rulesModal.style.display = 'flex';
+                rulesModal.innerHTML = `
+                    <div class="victory-content">
+                        <div style="font-size: 2rem; margin-bottom: 20px;">📋</div>
+                        <h2 style="font-family: 'Fredoka One', cursive; color: #4a00e0; margin-bottom: 16px;">Game Rules</h2>
+                        <div style="text-align: left; font-size: 0.9rem; line-height: 1.6;">
+                            <p><strong>🎯 Objective:</strong> Mark squares that describe your beautiful chaos</p>
+                            <p><strong>🏆 Win Condition:</strong> Get 3 in a row (any direction)</p>
+                            <p><strong>🍪 Reward:</strong> Dopamine snack + questionable dignity</p>
+                            <p><strong>✨ Tip:</strong> We're all just winging it!</p>
+                        </div>
+                        <button class="btn" onclick="this.parentElement.parentElement.remove()" style="margin-top: 20px;">
+                            Got It! 👍
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(rulesModal);
+            }
+            
+            createConfetti() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#ff9ff3', '#54a0ff'];
+                const confettiContainer = document.createElement('div');
+                confettiContainer.className = 'confetti';
+                document.body.appendChild(confettiContainer);
+                
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        const piece = document.createElement('div');
+                        piece.className = 'confetti-piece';
+                        piece.style.left = Math.random() * 100 + '%';
+                        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        piece.style.animationDelay = Math.random() * 3 + 's';
+                        piece.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                        
+                        const size = Math.random() * 6 + 4;
+                        piece.style.width = size + 'px';
+                        piece.style.height = size + 'px';
+                        
+                        piece.style.animation = `
+                            confetti-fall ${Math.random() * 3 + 2}s linear forwards,
+                            float ${Math.random() * 2 + 1}s ease-in-out infinite
+                        `;
+                        
+                        confettiContainer.appendChild(piece);
+                    }, i * 30);
+                }
+                
+                setTimeout(() => {
+                    confettiContainer.remove();
+                }, 8000);
+            }
+            
+            addEventListeners() {
+                // Global keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        switch(e.key) {
+                            case 'r':
+                                e.preventDefault();
+                                this.resetGame();
+                                break;
+                            case 'h':
+                                e.preventDefault();
+                                this.showRules();
+                                break;
+                        }
+                    }
+                    
+                    if (e.key === 'Escape') {
+                        this.closeVictory();
+                    }
+                });
+                
+                // Touch gesture support
+                let touchStartY = 0;
+                document.addEventListener('touchstart', (e) => {
+                    touchStartY = e.touches[0].clientY;
+                }, { passive: true });
+                
+                document.addEventListener('touchend', (e) => {
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const diff = touchStartY - touchEndY;
+                    
+                    // Pull to refresh gesture
+                    if (diff < -100 && window.scrollY === 0) {
+                        this.resetGame();
+                    }
+                }, { passive: true });
             }
         }
         
-        // Initialize the game when the page loads
-        document.addEventListener('DOMContentLoaded', initGame);
+        // Initialize game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.game = new DysfunctionBingo();
+        });
+        
+        // Global functions for button onclick handlers
+        function resetGame() { window.game.resetGame(); }
+        function markRandom() { window.game.markRandom(); }
+        function showRules() { window.game.showRules(); }
+        function closeVictory() { window.game.closeVictory(); }
+        
+        // Add dynamic CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes confetti-fall {
+                0% { 
+                    transform: translateY(-100vh) rotate(0deg); 
+                    opacity: 1; 
+                }
+                100% { 
+                    transform: translateY(100vh) rotate(720deg); 
+                    opacity: 0; 
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
